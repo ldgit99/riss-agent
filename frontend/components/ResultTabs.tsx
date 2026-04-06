@@ -12,34 +12,22 @@ interface ResultTabsProps {
 const TAB_KEYS = ['riss_hs', 'riss_hw', 'kci', 'all'] as const
 type TabKey = typeof TAB_KEYS[number]
 
+// Railway 백엔드 URL (빌드 시 주입 — 없으면 빈 문자열)
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? ''
+
 export default function ResultTabs({ jobId, counts, label }: ResultTabsProps) {
   const [active, setActive] = useState<TabKey>('all')
-  const [downloading, setDownloading] = useState<TabKey | null>(null)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? ''
-
-  const handleDownload = async (fileType: TabKey) => {
-    setDownloading(fileType)
-    try {
-      const res = await fetch(
-        `/api/download?jobId=${jobId}&fileType=${fileType}`
-      )
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-        throw new Error(json.detail ?? json.error ?? '다운로드 실패')
-      }
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${label}_${FILE_TYPE_LABEL[fileType]}.csv`
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch (e) {
-      alert(e instanceof Error ? e.message : '다운로드 중 오류가 발생했습니다.')
-    } finally {
-      setDownloading(null)
-    }
+  // 브라우저 직접 다운로드 — fetch 프록시 없음
+  // 브라우저 <a href> 다운로드는 CORS 적용 대상이 아님
+  const handleDownload = (fileType: TabKey) => {
+    const url = `${BACKEND}/api/download/${jobId}?file_type=${fileType}`
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${label}_${FILE_TYPE_LABEL[fileType]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
   }
 
   return (
@@ -73,27 +61,15 @@ export default function ResultTabs({ jobId, counts, label }: ResultTabsProps) {
           </p>
           <button
             onClick={() => handleDownload(active)}
-            disabled={downloading === active || (counts[active] ?? 0) === 0}
+            disabled={(counts[active] ?? 0) === 0}
             className="rounded-md bg-gray-800 px-3 py-1.5 text-xs font-semibold text-white
                        hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed
                        transition-colors duration-150 flex items-center gap-1.5"
           >
-            {downloading === active ? (
-              <>
-                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                다운로드 중
-              </>
-            ) : (
-              <>
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                CSV 다운로드
-              </>
-            )}
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            CSV 다운로드
           </button>
         </div>
 
