@@ -75,21 +75,14 @@ jobs:
           vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }} \
             --env NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_URL }}
 
-  # ─── Railway 배포 (main 브랜치 push 시에만) ────────────────────────────────
+  # ─── Render 배포 (main 브랜치 push 시에만) ────────────────────────────────
   deploy-backend:
-    name: Deploy to Railway
+    name: Deploy to Render
     needs: [test-backend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy to Railway
-        working-directory: backend
-        run: railway up --detach --service riss-agent
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Trigger Render Deploy Hook
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
