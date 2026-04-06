@@ -23,7 +23,7 @@ HEADERS = {
     )
 }
 PAGE_SIZE = 100
-SLEEP_PER_PAGE = 1.0
+SLEEP_PER_PAGE = 0.3
 
 
 def get_total_count(keyword: str, col_name: str) -> int:
