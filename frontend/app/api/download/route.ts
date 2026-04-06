@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+const BACKEND = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -11,30 +11,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'jobId, fileType 파라미터가 필요합니다.' }, { status: 400 })
   }
 
+  let res: Response
   try {
-    const upstream = `${API_URL}/api/download/${jobId}?file_type=${fileType}`
-    const res = await fetch(upstream)
-
-    if (!res.ok) {
-      const body = await res.text()
-      return NextResponse.json(
-        { error: `백엔드 오류: ${res.status}`, detail: body },
-        { status: res.status }
-      )
-    }
-
-    const blob     = await res.blob()
-    const filename = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1]
-                     ?? `${fileType}.csv`
-
-    return new NextResponse(blob, {
-      headers: {
-        'Content-Type':        'text/csv; charset=utf-8-sig',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-      },
-    })
+    res = await fetch(`${BACKEND}/api/download/${jobId}?file_type=${fileType}`)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: '다운로드 실패', detail: message }, { status: 500 })
+    return NextResponse.json(
+      { error: '백엔드 연결 실패', detail: message },
+      { status: 502 }
+    )
   }
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    return NextResponse.json(
+      { error: `백엔드 오류: ${res.status}`, detail: body },
+      { status: res.status }
+    )
+  }
+
+  const buffer   = await res.arrayBuffer()
+  const filename = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1]
+                   ?? `${fileType}.csv`
+
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type':        'text/csv; charset=utf-8-sig',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    },
+  })
 }
