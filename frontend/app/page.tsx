@@ -109,7 +109,7 @@ export default function Home() {
 
         {doneEvent && (() => {
           const rawTotal  = doneEvent.counts.raw_total
-                          ?? (doneEvent.counts.riss_hs + doneEvent.counts.riss_hw + doneEvent.counts.kci)
+                          ?? (doneEvent.counts.riss_hs + doneEvent.counts.riss_hw)
           const dupCount  = doneEvent.counts.duplicate_count ?? (rawTotal - doneEvent.counts.all)
           return (
           <div className="space-y-3">
