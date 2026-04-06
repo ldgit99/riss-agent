@@ -10,6 +10,7 @@
 """
 
 import asyncio
+import io
 import json
 import os
 import uuid
@@ -163,10 +164,9 @@ async def run_stream(keyword_raw: str) -> AsyncGenerator[str, None]:
     for key, df in df_map.items():
         fname = name_map[key]
         files[key] = _save(df, folder, fname)
-        _csv_cache[job_id][key] = (
-            df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig"),
-            fname,
-        )
+        buf = io.BytesIO()
+        df.to_csv(buf, index=False, encoding="utf-8-sig")
+        _csv_cache[job_id][key] = (buf.getvalue(), fname)
 
     counts = {
         "riss_hs":        len(df_hs),
