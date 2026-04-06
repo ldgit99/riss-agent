@@ -24,6 +24,10 @@ from utils.query_converter import build_queries
 
 OUTPUT_ROOT = os.path.join(os.path.dirname(__file__), "..", "output")
 
+# Railway 재시작 전까지 CSV를 메모리에 보관 (파일시스템 소실 대비)
+# { job_id: { "riss_hs": (bytes, filename), ... } }
+_csv_cache: dict[str, dict[str, tuple[bytes, str]]] = {}
+
 
 # ─── SSE 이벤트 헬퍼 ────────────────────────────────────────────────────────
 
@@ -141,12 +145,28 @@ async def run_stream(keyword_raw: str) -> AsyncGenerator[str, None]:
     folder = os.path.join(OUTPUT_ROOT, label, job_id)
     os.makedirs(folder, exist_ok=True)
 
-    files = {
-        "riss_hs": _save(df_hs,  folder, f"{label}_학술논문(riss).csv"),
-        "riss_hw": _save(df_hw,  folder, f"{label}_학위논문.csv"),
-        "kci":     _save(df_kci, folder, f"{label}_학술논문(kci).csv"),
-        "all":     _save(df_all, folder, f"{label}_all.csv"),
+    name_map = {
+        "riss_hs": f"{label}_학술논문(riss).csv",
+        "riss_hw": f"{label}_학위논문.csv",
+        "kci":     f"{label}_학술논문(kci).csv",
+        "all":     f"{label}_all.csv",
     }
+    df_map = {
+        "riss_hs": df_hs,
+        "riss_hw": df_hw,
+        "kci":     df_kci,
+        "all":     df_all,
+    }
+
+    files = {}
+    _csv_cache[job_id] = {}
+    for key, df in df_map.items():
+        fname = name_map[key]
+        files[key] = _save(df, folder, fname)
+        _csv_cache[job_id][key] = (
+            df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig"),
+            fname,
+        )
 
     counts = {
         "riss_hs":        len(df_hs),

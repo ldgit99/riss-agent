@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
-from agents.coordinator import run_stream
+from agents.coordinator import run_stream, _csv_cache
 from utils.query_converter import build_queries
 
 # ─── 앱 초기화 ──────────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ def download(
 ):
     """
     수집 완료 후 CSV 파일 다운로드.
-    job_id와 file_type으로 파일 경로를 탐색한다.
+    메모리 캐시를 먼저 확인하고, 없으면 파일시스템에서 탐색한다.
     """
     type_map = {
         "riss_hs": "학술논문(riss)",
@@ -125,6 +125,17 @@ def download(
             detail=f"file_type은 {list(type_map.keys())} 중 하나여야 합니다.",
         )
 
+    # ── 메모리 캐시 우선 ───────────────────────────────────────────────────
+    if job_id in _csv_cache and file_type in _csv_cache[job_id]:
+        csv_bytes, filename = _csv_cache[job_id][file_type]
+        from fastapi.responses import Response
+        return Response(
+            content=csv_bytes,
+            media_type="text/csv; charset=utf-8-sig",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
+    # ── 파일시스템 폴백 ────────────────────────────────────────────────────
     suffix = type_map[file_type]
     pattern = os.path.join(OUTPUT_ROOT, "**", job_id, f"*_{suffix}.csv")
     matches = glob.glob(pattern, recursive=True)
@@ -132,7 +143,7 @@ def download(
     if not matches:
         raise HTTPException(
             status_code=404,
-            detail=f"job_id={job_id}, file_type={file_type} 에 해당하는 파일이 없습니다.",
+            detail=f"job_id={job_id}, file_type={file_type} 파일을 찾을 수 없습니다. (서버 재시작 후 데이터 소실)",
         )
 
     path = matches[0]
@@ -141,7 +152,5 @@ def download(
     return FileResponse(
         path,
         media_type="text/csv; charset=utf-8-sig",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"',
-        },
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
