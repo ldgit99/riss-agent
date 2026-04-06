@@ -17,6 +17,12 @@ export default function Home() {
   const [doneEvent, setDoneEvent] = useState<SSEDoneEvent | null>(null)
   const readerRef = useRef<ReadableStreamDefaultReader | null>(null)
 
+  const handleStop = () => {
+    readerRef.current?.cancel()
+    readerRef.current = null
+    setIsLoading(false)
+  }
+
   const handleSearch = async (kw: string) => {
     readerRef.current?.cancel()
     setIsLoading(true)
@@ -88,7 +94,17 @@ export default function Home() {
         {keyword.trim() && <QueryPreview keyword={keyword} />}
 
         {(isLoading || events.length > 0) && (
-          <ProgressPanel events={events} />
+          <div className="space-y-2">
+            <ProgressPanel events={events} />
+            {isLoading && (
+              <button
+                onClick={handleStop}
+                className="w-full rounded-lg border border-red-200 bg-red-50 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+              >
+                수집 중단
+              </button>
+            )}
+          </div>
         )}
 
         {doneEvent && (() => {
