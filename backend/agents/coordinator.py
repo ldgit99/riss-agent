@@ -109,7 +109,7 @@ async def run_stream(keyword_raw: str) -> AsyncGenerator[str, None]:
                     done.add(f)
                     name = futures[f]
                     try:
-                        results[name] = f.result()
+                        results[name] = f.result(timeout=1)
                     except Exception as e:
                         errors[name] = str(e)
                         results[name] = pd.DataFrame()
