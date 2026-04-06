@@ -1,12 +1,8 @@
 {
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/.next",
-  "installCommand": "cd frontend && npm install",
-  "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "dev": false
     }
-  ]
+  }
 }
