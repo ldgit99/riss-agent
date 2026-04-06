@@ -7,7 +7,8 @@ import ProgressPanel from '@/components/ProgressPanel'
 import ResultTabs from '@/components/ResultTabs'
 import { SSEEvent, SSEDoneEvent } from '@/lib/types'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+// Next.js 자체 API 라우트로 프록시 → CORS 문제 없음
+const API_URL = ''
 
 export default function Home() {
   const [keyword, setKeyword]     = useState('')
