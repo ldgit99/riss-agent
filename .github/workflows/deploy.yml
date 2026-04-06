@@ -72,5 +72,5 @@ jobs:
       - name: Deploy to Vercel (Production)
         working-directory: frontend
         run: |
-          vercel --prod --token=${{ secrets.VERCEL_TOKEN }} \
+          vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }} \
             --env NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_URL }}

@@ -16,8 +16,9 @@ export async function GET(req: NextRequest) {
     const res = await fetch(upstream)
 
     if (!res.ok) {
+      const body = await res.text()
       return NextResponse.json(
-        { error: `백엔드 오류: ${res.status}` },
+        { error: `백엔드 오류: ${res.status}`, detail: body },
         { status: res.status }
       )
     }
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (err) {
-    return NextResponse.json({ error: '다운로드 실패' }, { status: 500 })
+    const message = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: '다운로드 실패', detail: message }, { status: 500 })
   }
 }

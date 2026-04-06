@@ -67,18 +67,13 @@ def collect(
 
     Args:
         keyword:     KCI 불리언 쿼리
-        num_papers:  수집 수 (None이면 전체)
+        num_papers:  수집 수 (None이면 전체 — docsCount=9999로 한 번에 요청)
         progress_cb: (collected, total) 진행상황 콜백
     """
-    if num_papers is None:
-        num_papers = get_total_count(keyword)
-        if num_papers == 0:
-            print("[KCI] 검색 결과 없음")
-            return pd.DataFrame()
+    fetch_count = num_papers if num_papers is not None else 9999
+    print(f"[KCI] 목록 요청 (docsCount={fetch_count})")
 
-    print(f"[KCI] 전체 {num_papers}건 수집 시작")
-
-    payload = _build_payload(keyword, 1, num_papers)
+    payload = _build_payload(keyword, 1, fetch_count)
     try:
         resp = requests.post(
             KCI_SEARCH_URL, data=payload, headers=HEADERS, timeout=30
@@ -91,6 +86,9 @@ def collect(
     soup = BeautifulSoup(resp.content, "lxml")
     title_tags = soup.find_all("a", class_="subject")
     total = len(title_tags)
+    if total == 0:
+        print("[KCI] 검색 결과 없음")
+        return pd.DataFrame()
     print(f"[KCI] {total}건 제목 발견")
 
     rows: list[dict] = []

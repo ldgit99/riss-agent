@@ -93,12 +93,20 @@ export default function Home() {
 
         {doneEvent && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
                 수집 완료
               </span>
-              <span className="text-sm text-gray-500">
-                총 <strong>{doneEvent.counts.all}</strong>건 (중복 제거 후)
+              <span className="text-sm text-gray-600">
+                검색된 논문수 <strong className="text-gray-900">{doneEvent.counts.raw_total}</strong>건
+              </span>
+              <span className="text-gray-300">·</span>
+              <span className="text-sm text-gray-600">
+                중복 논문수 <strong className="text-gray-900">{doneEvent.counts.duplicate_count}</strong>건
+              </span>
+              <span className="text-gray-300">·</span>
+              <span className="text-sm text-gray-600">
+                중복 제거 후 총 논문수 <strong className="text-gray-900">{doneEvent.counts.all}</strong>건
               </span>
             </div>
             <ResultTabs

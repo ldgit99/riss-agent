@@ -22,6 +22,8 @@ export interface SSEDoneEvent {
     riss_hw: number
     kci: number
     all: number
+    raw_total: number
+    duplicate_count: number
   }
   files: Record<string, string>
 }

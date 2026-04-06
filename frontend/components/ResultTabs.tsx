@@ -24,7 +24,10 @@ export default function ResultTabs({ jobId, counts, label }: ResultTabsProps) {
       const res = await fetch(
         `/api/download?jobId=${jobId}&fileType=${fileType}`
       )
-      if (!res.ok) throw new Error('다운로드 실패')
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+        throw new Error(json.detail ?? json.error ?? '다운로드 실패')
+      }
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')

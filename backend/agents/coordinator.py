@@ -126,10 +126,15 @@ async def run_stream(keyword_raw: str) -> AsyncGenerator[str, None]:
     df_hw  = results["riss_hw"] if results["riss_hw"] is not None else pd.DataFrame()
     df_kci = results["kci"]     if results["kci"]     is not None else pd.DataFrame()
 
+    raw_total = len(df_hs) + len(df_hw) + len(df_kci)
+
     df_all = pd.concat([df_kci, df_hs, df_hw], ignore_index=True)
     if not df_all.empty and "Title" in df_all.columns:
         subset = ["Title", "Journal"] if "Journal" in df_all.columns else ["Title"]
         df_all = df_all.drop_duplicates(subset=subset, keep="first")
+
+    dedup_total    = len(df_all)
+    duplicate_count = raw_total - dedup_total
 
     # ── 저장 ──────────────────────────────────────────────────────────────
     label  = _make_label(queries["groups"])
@@ -144,10 +149,12 @@ async def run_stream(keyword_raw: str) -> AsyncGenerator[str, None]:
     }
 
     counts = {
-        "riss_hs": len(df_hs),
-        "riss_hw": len(df_hw),
-        "kci":     len(df_kci),
-        "all":     len(df_all),
+        "riss_hs":        len(df_hs),
+        "riss_hw":        len(df_hw),
+        "kci":            len(df_kci),
+        "all":            dedup_total,
+        "raw_total":      raw_total,
+        "duplicate_count": duplicate_count,
     }
 
     yield _sse({
