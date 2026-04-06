@@ -11,6 +11,7 @@ FastAPI 백엔드 서버
 import glob
 import os
 import traceback
+from urllib.parse import quote
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -133,7 +134,7 @@ def download(
             return Response(
                 content=csv_bytes,
                 media_type="text/csv; charset=utf-8-sig",
-                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+                headers={"Content-Disposition": _content_disposition(filename)},
             )
 
         # ── 파일시스템 폴백 ────────────────────────────────────────────────
@@ -150,10 +151,10 @@ def download(
         path = matches[0]
         filename = os.path.basename(path)
 
-        return FileResponse(
-            path,
+        return Response(
+            content=open(path, "rb").read(),
             media_type="text/csv; charset=utf-8-sig",
-            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+            headers={"Content-Disposition": _content_disposition(filename)},
         )
 
     except HTTPException:
@@ -162,3 +163,9 @@ def download(
         tb = traceback.format_exc()
         print(f"[download] 오류: {e}\n{tb}")
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+def _content_disposition(filename: str) -> str:
+    """한글 파일명을 RFC 5987 방식으로 인코딩"""
+    encoded = quote(filename, encoding="utf-8")
+    return f"attachment; filename*=UTF-8''{encoded}"
