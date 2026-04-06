@@ -91,18 +91,22 @@ export default function Home() {
           <ProgressPanel events={events} />
         )}
 
-        {doneEvent && (
+        {doneEvent && (() => {
+          const rawTotal  = doneEvent.counts.raw_total
+                          ?? (doneEvent.counts.riss_hs + doneEvent.counts.riss_hw + doneEvent.counts.kci)
+          const dupCount  = doneEvent.counts.duplicate_count ?? (rawTotal - doneEvent.counts.all)
+          return (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
                 수집 완료
               </span>
               <span className="text-sm text-gray-600">
-                검색된 논문수 <strong className="text-gray-900">{doneEvent.counts.raw_total}</strong>건
+                검색된 논문수 <strong className="text-gray-900">{rawTotal}</strong>건
               </span>
               <span className="text-gray-300">·</span>
               <span className="text-sm text-gray-600">
-                중복 논문수 <strong className="text-gray-900">{doneEvent.counts.duplicate_count}</strong>건
+                중복 논문수 <strong className="text-gray-900">{dupCount}</strong>건
               </span>
               <span className="text-gray-300">·</span>
               <span className="text-sm text-gray-600">
@@ -115,7 +119,8 @@ export default function Home() {
               label={doneEvent.label}
             />
           </div>
-        )}
+          )
+        })()}
 
       </div>
     </main>

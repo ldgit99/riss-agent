@@ -36,7 +36,7 @@ export default function ResultTabs({ jobId, counts, label }: ResultTabsProps) {
       a.click()
       URL.revokeObjectURL(url)
     } catch (e) {
-      alert('다운로드 중 오류가 발생했습니다.')
+      alert(e instanceof Error ? e.message : '다운로드 중 오류가 발생했습니다.')
     } finally {
       setDownloading(null)
     }
