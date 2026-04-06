@@ -21,7 +21,7 @@ export default function ProgressPanel({ events }: ProgressPanelProps) {
   }
 
   const isDone = events.some(e => e.type === 'done')
-  const agents: Array<'riss_hs' | 'riss_hw'> = ['riss_hs', 'riss_hw']
+  const agents = ['riss_hs', 'riss_hw'] as const
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">

@@ -8,7 +8,7 @@ export interface SSEQueryEvent {
 
 export interface SSEProgressEvent {
   type: 'progress'
-  agent: 'riss_hs' | 'riss_hw'
+  agent: string
   count: number
   total: number
 }
