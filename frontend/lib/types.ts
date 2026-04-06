@@ -8,7 +8,7 @@ export interface SSEQueryEvent {
 
 export interface SSEProgressEvent {
   type: 'progress'
-  agent: 'riss_hs' | 'riss_hw' | 'kci'
+  agent: 'riss_hs' | 'riss_hw'
   count: number
   total: number
 }
@@ -20,7 +20,6 @@ export interface SSEDoneEvent {
   counts: {
     riss_hs: number
     riss_hw: number
-    kci: number
     all: number
     raw_total: number
     duplicate_count: number
@@ -39,12 +38,10 @@ export type SSEEvent = SSEQueryEvent | SSEProgressEvent | SSEDoneEvent | SSEErro
 export const AGENT_LABEL: Record<string, string> = {
   riss_hs: 'RISS 학술논문',
   riss_hw: 'RISS 학위논문',
-  kci:     'KCI 학술논문',
 }
 
 export const FILE_TYPE_LABEL: Record<string, string> = {
   riss_hs: 'RISS 학술논문',
   riss_hw: 'RISS 학위논문',
-  kci:     'KCI 학술논문',
   all:     '전체 통합',
 }

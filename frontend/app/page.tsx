@@ -78,7 +78,7 @@ export default function Home() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">논문 서지정보 수집기</h1>
           <p className="mt-1 text-sm text-gray-500">
-            RISS · KCI 학술/학위 논문 서지정보를 한 번에 수집합니다.
+            RISS 학술/학위 논문 서지정보를 수집합니다.
           </p>
         </div>
 

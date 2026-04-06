@@ -118,7 +118,6 @@ def download(
     type_map = {
         "riss_hs": "학술논문(riss)",
         "riss_hw": "학위논문",
-        "kci":     "학술논문(kci)",
         "all":     "all",
     }
     if file_type not in type_map:

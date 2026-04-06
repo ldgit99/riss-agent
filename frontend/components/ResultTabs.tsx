@@ -9,7 +9,7 @@ interface ResultTabsProps {
   label: string
 }
 
-const TAB_KEYS = ['riss_hs', 'riss_hw', 'kci', 'all'] as const
+const TAB_KEYS = ['riss_hs', 'riss_hw', 'all'] as const
 type TabKey = typeof TAB_KEYS[number]
 
 // Railway 백엔드 URL (빌드 시 주입 — 없으면 빈 문자열)
