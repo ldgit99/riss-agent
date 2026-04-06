@@ -1,0 +1,28 @@
+# 환경변수
+.env
+.env.local
+frontend/.env.local
+
+# 수집 결과 CSV (용량 큰 파일)
+backend/output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
