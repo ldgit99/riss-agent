@@ -24,7 +24,8 @@ HEADERS        = {
         "Chrome/124.0.0.0 Safari/537.36"
     )
 }
-DETAIL_WORKERS = 8   # 상세 페이지 병렬 요청 수
+DETAIL_WORKERS = 4        # 상세 페이지 병렬 요청 수
+DETAIL_TIMEOUT = (5, 15)  # (연결 타임아웃, 읽기 타임아웃)
 
 
 def collect(
@@ -85,7 +86,7 @@ def _fetch_detail(tag) -> dict | None:
         href  = tag.get("href", "")
         link  = KCI_BASE + href if href.startswith("/") else href
 
-        resp = requests.get(link, headers=HEADERS, timeout=15)
+        resp = requests.get(link, headers=HEADERS, timeout=DETAIL_TIMEOUT)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.content, "lxml")
 
